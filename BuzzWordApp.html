@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI buzz · no hints</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f0f5fa 0%, #e3ecf3 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 2.5rem;
+      box-shadow: 
+        0 25px 45px -12px rgba(0, 30, 60, 0.3),
+        inset 0 1px 2px rgba(255, 255, 255, 0.7),
+        0 0 0 1px rgba(156, 188, 226, 0.2);
+      width: min(520px, 100%);
+      padding: 2rem 2rem 2.2rem;
+      transition: transform 0.2s;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.8rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .title-section {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .chip {
+      background: rgba(0, 100, 220, 0.08);
+      border-radius: 100px;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #1e5ba6;
+      border: 1px solid rgba(0,110,230,0.15);
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      background: linear-gradient(145deg, #122b44, #022036);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .counter-badge {
+      background: #122b44;
+      padding: 0.5rem 1.3rem;
+      border-radius: 80px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: white;
+      box-shadow: 0 8px 18px -6px rgba(0,60,120,0.5), inset 0 1px 2px rgba(255,255,255,0.2);
+      transition: transform 0.15s;
+    }
+
+    .counter-badge span:first-child {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .counter-number {
+      font-size: 2rem;
+      font-weight: 650;
+      line-height: 1;
+      background: linear-gradient(135deg, #ffffff, #d9ecff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      min-width: 2.4rem;
+      text-align: right;
+    }
+
+    .progress-hint {
+      width: 100%;
+      height: 6px;
+      background: rgba(0,0,0,0.06);
+      border-radius: 10px;
+      margin: 1rem 0 2rem 0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #2b6ed7, #8fb9ff);
+      border-radius: 10px;
+      transform-origin: left;
+      transition: transform 0.3s ease-out;
+    }
+
+    .guess-area {
+      margin: 1.5rem 0 1.2rem;
+    }
+
+    .input-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #1e3b5c;
+      margin-bottom: 0.5rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0.8rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .input-wrapper {
+      flex: 1;
+      position: relative;
+      min-width: 220px;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #4f6f8f;
+      font-size: 1.2rem;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    #wordInput {
+      width: 100%;
+      padding: 1rem 1rem 1rem 2.8rem;
+      border-radius: 60px;
+      border: 1.5px solid rgba(130, 160, 200, 0.3);
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(6px);
+      font-size: 1.1rem;
+      color: #11212e;
+      outline: none;
+      transition: all 0.2s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+    }
+
+    #wordInput:focus {
+      border-color: #1e5ba6;
+      background: white;
+      box-shadow: 0 10px 22px -10px #1e5ba6, 0 0 0 3px rgba(30,91,166,0.15);
+    }
+
+    #wordInput:focus + .input-icon {
+      opacity: 1;
+      color: #1e5ba6;
+    }
+
+    .action-btn {
+      background: #122b44;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 60px;
+      color: white;
+      font-weight: 600;
+      font-size: 1.05rem;
+      cursor: pointer;
+      box-shadow: 0 8px 20px -10px #0b1f33, 0 0 0 1px rgba(255,255,255,0.15) inset;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+    }
+
+    .action-btn:hover:not(:disabled) {
+      background: #1a3455;
+      transform: scale(1.02);
+      box-shadow: 0 14px 24px -12px #102b44;
+    }
+
+    .action-btn:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .action-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: #5a6f89;
+    }
+
+    .message-area {
+      min-height: 4rem;
+      margin: 1rem 0 0.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .toast {
+      padding: 0.8rem 1.4rem;
+      border-radius: 60px;
+      background: white;
+      box-shadow: 0 8px 20px -8px rgba(0,32,64,0.25);
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-left: 5px solid;
+      animation: slideIn 0.25s ease, fadeSoft 2.5s forwards;
+    }
+
+    .toast.success {
+      border-left-color: #0e8342;
+      background: #ecfaf1;
+      color: #0a562b;
+    }
+
+    .toast.error {
+      border-left-color: #c9353e;
+      background: #fff0f1;
+      color: #a12b32;
+    }
+
+    .toast.warning {
+      border-left-color: #e68a2e;
+      background: #fff4e8;
+      color: #965d1c;
+    }
+
+    @keyframes slideIn {
+      0% { opacity: 0; transform: translateY(12px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeSoft {
+      0% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    .footer-note {
+      font-size: 0.8rem;
+      color: #5f7a9c;
+      margin-top: 2rem;
+      text-align: center;
+      opacity: 0.6;
+      border-top: 1px dashed rgba(90, 120, 160, 0.2);
+      padding-top: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="glass-panel">
+    <div class="header-row">
+      <div class="title-section">
+        <h1>AI buzz</h1>
+        <div class="chip">knowledge check</div>
+      </div>
+      <div class="counter-badge" id="counterBadge">
+        <span>left</span>
+        <span class="counter-number" id="counterDisplay">20</span>
+      </div>
+    </div>
+
+    <!-- simple progress bar (only hint of progress) -->
+    <div class="progress-hint">
+      <div class="progress-fill" id="progressFill" style="transform: scaleX(1);"></div>
+    </div>
+
+    <!-- main guess area (no word list, no hints) -->
+    <div class="guess-area">
+      <div class="input-label">
+        <span>🤖 guess an AI buzzword</span>
+      </div>
+      <div class="input-row">
+        <div class="input-wrapper">
+          <span class="input-icon">⌘</span>
+          <input type="text" id="wordInput" placeholder="e.g. neural network" autofocus>
+        </div>
+        <button class="action-btn" id="checkBtn">
+          <span>check</span>
+          <span style="font-size:1.2rem;">⏎</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- message area for feedback only (no word bank) -->
+    <div class="message-area" id="messageArea"></div>
+
+    <!-- subtle footer (no hints) -->
+    <div class="footer-note">20 buzzwords · find them all</div>
+  </div>
+
+  <script>
+    (function() {
+      // ----- 20 AI buzzwords (hidden, no hints) -----
+      const MASTER_LIST = [
+        'machine learning', 'neural network', 'deep learning', 'algorithm',
+        'large language model', 'llm', 'natural language processing', 'nlp',
+        'computer vision', 'generative ai', 'transformer', 'gpt',
+        'reinforcement learning', 'supervised learning', 'unsupervised learning',
+        'training data', 'inference', 'hallucination', 'fine tuning', 'token'
+      ];
+
+      // normalized set for validation
+      const NORMALIZED_SET = new Set(MASTER_LIST.map(w => w.trim().toLowerCase()));
+
+      // state
+      let remainingWords = MASTER_LIST.map(w => w); // keep original case (for potential future use, but not displayed)
+      let solvedCount = 0;
+      const totalWords = MASTER_LIST.length; // 20
+
+      // UI elements
+      const counterDisplay = document.getElementById('counterDisplay');
+      const progressFill = document.getElementById('progressFill');
+      const wordInput = document.getElementById('wordInput');
+      const checkBtn = document.getElementById('checkBtn');
+      const messageArea = document.getElementById('messageArea');
+      const counterBadge = document.getElementById('counterBadge');
+
+      // helper: show temporary message
+      function showMessage(text, type = 'error') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = text;
+        messageArea.innerHTML = ''; 
+        messageArea.appendChild(toast);
+
+        setTimeout(() => {
+          if (messageArea.contains(toast)) {
+            toast.style.opacity = '0';
+            setTimeout(() => {
+              if (messageArea.contains(toast)) messageArea.removeChild(toast);
+            }, 300);
+          }
+        }, 2400);
+      }
+
+      // update counter + progress bar
+      function updateCounterUI() {
+        const left = remainingWords.length;
+        counterDisplay.textContent = left;
+        const scaleX = left / totalWords; 
+        progressFill.style.transform = `scaleX(${scaleX})`;
+
+        // subtle pulse animation on counter
+        counterBadge.style.transform = 'scale(1.05)';
+        setTimeout(() => counterBadge.style.transform = 'scale(1)', 120);
+      }
+
+      // check guess
+      function handleGuess() {
+        const rawInput = wordInput.value.trim();
+        if (rawInput === '') {
+          showMessage('🕵️ enter a buzzword', 'warning');
+          return;
+        }
+
+        const lowerInput = rawInput.toLowerCase();
+
+        // must be one of the 20 (correct category)
+        if (!NORMALIZED_SET.has(lowerInput)) {
+          // not in list → try again
+          showMessage('✖️ try again — not a known AI buzzword', 'error');
+          wordInput.value = '';
+          wordInput.focus();
+          return;
+        }
+
+        // check if still unsolved
+        const indexInRemaining = remainingWords.findIndex(w => w.toLowerCase() === lowerInput);
+        if (indexInRemaining === -1) {
+          // already guessed
+          showMessage(`⏳ "${rawInput}" already guessed`, 'warning');
+          wordInput.value = '';
+          wordInput.focus();
+          return;
+        }
+
+        // ---------- CORRECT (new word) ----------
+        remainingWords.splice(indexInRemaining, 1);
+        solvedCount++;
+
+        // refresh UI
+        updateCounterUI();
+
+        const left = remainingWords.length;
+        if (left === 0) {
+          showMessage('🎉 YOU DID IT! All 20 buzzwords found.', 'success');
+          checkBtn.disabled = true;
+          wordInput.disabled = true;
+        } else {
+          showMessage(`✅ correct! ${left} more to find`, 'success');
+        }
+
+        wordInput.value = '';
+        wordInput.focus();
+      }
+
+      // initial render
+      function initGame() {
+        remainingWords = MASTER_LIST.map(w => w);
+        solvedCount = 0;
+        updateCounterUI();
+        checkBtn.disabled = false;
+        wordInput.disabled = false;
+        wordInput.value = '';
+        messageArea.innerHTML = '';
+        wordInput.focus();
+      }
+
+      // event listeners
+      checkBtn.addEventListener('click', handleGuess);
+      wordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          checkBtn.click();
+        }
+      });
+
+      // start
+      initGame();
+    })();
+  </script>
+</body>
+</html>
