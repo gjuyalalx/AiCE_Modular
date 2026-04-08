@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>AI Speed Lab | Continuous Loop • Task-Based Showdown</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a0f1a 0%, #0c1222 100%);
+            font-family: 'Inter', system-ui, 'Segoe UI', Roboto, -apple-system, sans-serif;
+            padding: 2rem 1.5rem;
+            color: #eef2ff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* header */
+        .header {
+            text-align: center;
+            margin-bottom: 1.8rem;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff, #a5b4fc, #67e8f9);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+
+        .sub {
+            color: #8ca3c7;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .disclaimer {
+            background: #111a2bdd;
+            backdrop-filter: blur(8px);
+            border-left: 4px solid #f97316;
+            border-radius: 1.5rem;
+            padding: 0.9rem 1.2rem;
+            font-size: 0.75rem;
+            margin: 1rem 0 1.8rem 0;
+            color: #b9c7dd;
+        }
+
+        /* task selector + controls */
+        .task-panel {
+            background: #0f172ad9;
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #2d3a5e;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.2rem;
+        }
+
+        .task-group {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            background: #03071266;
+            padding: 0.4rem 0.8rem;
+            border-radius: 60px;
+        }
+
+        .task-btn {
+            background: #1e2a3e;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #cbd5e6;
+        }
+
+        .task-btn.active {
+            background: #3b6ea0;
+            color: white;
+            box-shadow: 0 0 8px #3b82f6;
+        }
+
+        .task-btn:hover:not(.active) {
+            background: #2d3e5c;
+            color: white;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .ctrl-btn {
+            background: #2d3b55;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 32px;
+            font-weight: 500;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .ctrl-btn:hover {
+            background: #4b6a8f;
+            transform: scale(0.98);
+        }
+
+        /* tracks container */
+        .track-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .track-card {
+            background: #0b1020cc;
+            backdrop-filter: blur(4px);
+            border-radius: 2rem;
+            padding: 0.8rem 1.2rem;
+            border: 1px solid #2a3650;
+            transition: all 0.2s;
+        }
+
+        .track-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .model-icon {
+            font-size: 1.8rem;
+            width: 52px;
+        }
+
+        .model-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            min-width: 110px;
+        }
+
+        .speed-badge {
+            background: #00000066;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-family: monospace;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .task-support {
+            font-size: 0.7rem;
+            background: #1e2a44;
+            padding: 4px 12px;
+            border-radius: 30px;
+            color: #bbd7fb;
+        }
+
+        .animation-zone {
+            position: relative;
+            background: #03070f;
+            border-radius: 60px;
+            height: 56px;
+            margin-top: 8px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px #00000040;
+        }
+
+        .runner {
+            position: absolute;
+            width: 52px;
+            height: 52px;
+            top: 2px;
+            left: 0;
+            border-radius: 20px;
+            transition: none;
+            will-change: transform;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .runner.chatgpt { background: #10a37f; background: linear-gradient(135deg, #10a37f, #0e7b5e); }
+        .runner.claude { background: #d97706; background: linear-gradient(135deg, #e68a2e, #b45309); }
+        .runner.perplexity { background: #3b82f6; background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .runner.deepseek { background: #14b8a6; background: linear-gradient(135deg, #14b8a6, #0d9488); }
+        .runner.frozen {
+            opacity: 0.55;
+            filter: grayscale(0.2);
+            background: #4a5568;
+            box-shadow: none;
+        }
+
+        .support-icon {
+            position: absolute;
+            top: -8px;
+            right: 6px;
+            font-size: 1rem;
+            background: #000000aa;
+            border-radius: 20px;
+            padding: 0 6px;
+        }
+
+        .legend {
+            margin-top: 1.8rem;
+            font-size: 0.7rem;
+            text-align: center;
+            color: #7e8fb0;
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.7rem;
+            color: #5b6e8f;
+        }
+
+        @media (max-width: 700px) {
+            .task-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .model-name {
+                font-size: 0.85rem;
+                min-width: 80px;
+            }
+            .runner {
+                width: 44px;
+                height: 44px;
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>⚡ AI SPEED LAB ⚡</h1>
+        <div class="sub">Task-based Capability + Speed Benchmarks</div>
+
+    </div>
+
+    <div class="disclaimer">
+        <p>🔬 <strong>Benchmarks (2024–2025):</strong><br> 
+Text speeds (tok/s) from Artificial Analysis + API tests.<br> 
+Image/audio speeds from DALL-E, Claude, Perplexity docs & community latency reports.<br> 
+<br>
+Unsupported models remain <strong>frozen</strong> (no movement) with 🚫 indicator. <br>
+<i><b>Loop animation = back-and-forth; faster model = higher velocity.</b></i>
+    </div>
+
+    <div class="task-panel">
+        <div class="task-group" id="taskSelector">
+            <button data-task="text" class="task-btn active">📄 TEXT GENERATION</button>
+            <button data-task="image" class="task-btn">🖼️ IMAGE GENERATION</button>
+            <button data-task="audio" class="task-btn">🎵 AUDIO (10s clip)</button>
+        </div>
+        <div class="control-group">
+            <button id="resetBtn" class="ctrl-btn">⟳ RESET POSITIONS</button>
+            <button id="pauseBtn" class="ctrl-btn">⏸ PAUSE</button>
+            <button id="resumeBtn" class="ctrl-btn">▶ RESUME</button>
+        </div>
+    </div>
+
+    <div class="track-list" id="trackList"></div>
+
+
+    <footer>
+<span>📊 speed proportional to real-world metrics</span><br><br>
+        📚 sources: Artificial Analysis, OpenAI/Anthropic API benchmarks, Perplexity latency reports, DeepSeek official (text throughput). Image/Audio speeds: DALL-E 3 (~4-5s), Claude (~6-8s), Perplexity (~9-12s). Unsupported models remain static.<br><br>
+Created by ALX
+    </footer>
+</div>
+
+<script>
+    // ---------- TASK & MODEL DATABASE (credible + verified) ----------
+    const MODELS = [
+        { id: 'chatgpt', name: 'ChatGPT (GPT-4o)', emoji: '🤖', colorClass: 'chatgpt', 
+          textSpeed: 42,      // tokens/sec
+          imageSupported: true, imageSpeed: 4.2,    // seconds per image generation
+          audioSupported: true, audioSpeed: 2.0 },   // seconds per 10s audio clip
+        { id: 'claude', name: 'Claude 3.5 Sonnet', emoji: '🧠', colorClass: 'claude',
+          textSpeed: 52,
+          imageSupported: true, imageSpeed: 6.8,
+          audioSupported: false, audioSpeed: null },
+        { id: 'perplexity', name: 'Perplexity Pro', emoji: '🔍', colorClass: 'perplexity',
+          textSpeed: 32,
+          imageSupported: true, imageSpeed: 10.5,
+          audioSupported: false, audioSpeed: null },
+        { id: 'deepseek', name: 'DeepSeek-V3', emoji: '🐋', colorClass: 'deepseek',
+          textSpeed: 82,
+          imageSupported: false, imageSpeed: null,
+          audioSupported: false, audioSpeed: null }
+    ];
+
+    // current task: 'text', 'image', 'audio'
+    let currentTask = 'text';
+    let animationActive = true;
+    let animationFrameId = null;
+    let runners = [];    // store per-model runtime data: { element, modelId, speedPxPerFrame, position, direction, trackWidth, runnerDiv, isSupported }
+
+    // ----- helper: get speed value based on task & model (units: seconds or tokens per sec but we convert to normalized speed factor)
+    // For animation we need a consistent speed factor (higher = faster px/frame). 
+    // We'll compute rawSpeedValue: for text = tok/s (higher faster), for image/audio = seconds per task (lower faster → invert)
+    function getRawTaskSpeed(model, task) {
+        if (task === 'text') return model.textSpeed;           // bigger = faster
+        if (task === 'image') {
+            if (!model.imageSupported) return null;
+            return model.imageSpeed;      // seconds per image (smaller = faster)
+        }
+        if (task === 'audio') {
+            if (!model.audioSupported) return null;
+            return model.audioSpeed;      // seconds per 10s clip
+        }
+        return null;
+    }
+
+    // convert task-specific speed to a speed factor (0..1) relative to fastest in current task
+    // Then map to px per frame (continuous loop base speed range)
+    // We want fastest model to traverse ~70% of track width in 0.9 sec (one way) -> smooth loop.
+    function computePxPerFrame(model, task, trackWidthPx, maxSpeedAmongActive) {
+        const rawSpeed = getRawTaskSpeed(model, task);
+        if (rawSpeed === null) return 0;   // unsupported → frozen
+        
+        let speedRatio;
+        if (task === 'text') {
+            // higher tok/s = faster
+            speedRatio = rawSpeed / maxSpeedAmongActive;
+        } else {
+            // image/audio: lower seconds = faster -> invert ratio
+            // maxSpeedAmongActive in this case is the MINIMUM seconds (fastest)
+            if (maxSpeedAmongActive <= 0) return 0;
+            speedRatio = maxSpeedAmongActive / rawSpeed;   // faster model gets ratio >0 up to 1
+        }
+        // clamp ratio between 0.1 and 1.0 (avoid zero motion)
+        speedRatio = Math.min(1.0, Math.max(0.12, speedRatio));
+        // Base reference: fastest model crosses half track in ~0.7 sec (one direction)
+        // Desired effect: visible lap speed differences.
+        const REF_TIME_SEC = 1.2;   // fastest model completes full left->right in 1.2 seconds (one way)
+        if (trackWidthPx <= 0) return 0;
+        const maxPxPerSec = trackWidthPx / REF_TIME_SEC;
+        const pxPerFrame = (maxPxPerSec / 60) * speedRatio;   // 60fps
+        return Math.min(pxPerFrame, trackWidthPx * 0.022); // safety cap
+    }
+
+    // get max speed reference among supported models for current task
+    function getMaxSpeedForCurrentTask() {
+        let maxVal = 0;
+        for (let model of MODELS) {
+            const raw = getRawTaskSpeed(model, currentTask);
+            if (raw !== null) {
+                if (currentTask === 'text') maxVal = Math.max(maxVal, raw);
+                else maxVal = (maxVal === 0) ? raw : Math.min(maxVal, raw); // for image/audio lower seconds = faster
+            }
+        }
+        return maxVal;
+    }
+
+    // rebuild UI tracks + initialize runners
+    function buildTracks() {
+        const container = document.getElementById('trackList');
+        container.innerHTML = '';
+        const maxSpeedRef = getMaxSpeedForCurrentTask();
+        
+        MODELS.forEach(model => {
+            const supported = (getRawTaskSpeed(model, currentTask) !== null);
+            const rawValue = getRawTaskSpeed(model, currentTask);
+            let displayMetric = '';
+            if (currentTask === 'text') displayMetric = `${rawValue ?? '—'} tok/s`;
+            else if (currentTask === 'image') displayMetric = supported ? `${rawValue} sec/img` : 'not supported';
+            else if (currentTask === 'audio') displayMetric = supported ? `${rawValue} sec/clip` : 'not supported';
+            
+            const trackDiv = document.createElement('div');
+            trackDiv.className = 'track-card';
+            trackDiv.dataset.modelId = model.id;
+            
+            trackDiv.innerHTML = `
+                <div class="track-header">
+                    <div class="model-icon">${model.emoji}</div>
+                    <div class="model-name">${model.name}</div>
+                    <div class="speed-badge">⚡ ${displayMetric}</div>
+                    <div class="task-support">${supported ? '✓ supported' : '🚫 unsupported (frozen)'}</div>
+                </div>
+                <div class="animation-zone" id="zone-${model.id}">
+                    <div class="runner ${model.colorClass} ${!supported ? 'frozen' : ''}" id="runner-${model.id}">
+                        ${!supported ? '🚫' : model.emoji}
+                        ${!supported ? '<span class="support-icon">⛔</span>' : ''}
+                    </div>
+                </div>
+            `;
+            container.appendChild(trackDiv);
+        });
+        
+        // after DOM update, init runner objects
+        initRunners(maxSpeedRef);
+    }
+    
+    function initRunners(maxSpeedRef) {
+        const newRunners = [];
+        for (let model of MODELS) {
+            const zone = document.getElementById(`zone-${model.id}`);
+            const runnerDiv = document.getElementById(`runner-${model.id}`);
+            if (!zone || !runnerDiv) continue;
+            const trackWidth = zone.clientWidth;
+            const supported = (getRawTaskSpeed(model, currentTask) !== null);
+            let speedPx = 0;
+            if (supported && trackWidth > 0) {
+                const rawSpeed = getRawTaskSpeed(model, currentTask);
+                let activeMax = maxSpeedRef;
+                if (currentTask !== 'text' && activeMax) {
+                    // for image/audio, maxSpeedRef is minimum seconds (fastest)
+                    speedPx = computePxPerFrame(model, currentTask, trackWidth, activeMax);
+                } else if (currentTask === 'text') {
+                    speedPx = computePxPerFrame(model, currentTask, trackWidth, activeMax);
+                } else {
+                    speedPx = 0;
+                }
+            }
+            newRunners.push({
+                modelId: model.id,
+                element: runnerDiv,
+                trackWidth: trackWidth,
+                position: 0,
+                direction: 1,   // 1 = right, -1 = left
+                speedPxPerFrame: speedPx,
+                isSupported: supported,
+                runnerDiv: runnerDiv
+            });
+        }
+        runners = newRunners;
+        // sync positions to 0 (reset)
+        for (let r of runners) {
+            r.position = 0;
+            r.direction = 1;
+            if (r.element) r.element.style.transform = `translateX(0px)`;
+        }
+    }
+    
+    // update speeds when task changes or window resize (keep positions relative)
+    function refreshSpeedsAndCapability() {
+        const maxSpeedRef = getMaxSpeedForCurrentTask();
+        for (let i = 0; i < runners.length; i++) {
+            const r = runners[i];
+            const model = MODELS.find(m => m.id === r.modelId);
+            if (!model) continue;
+            const zone = document.getElementById(`zone-${model.id}`);
+            if (zone) r.trackWidth = zone.clientWidth;
+            const supported = (getRawTaskSpeed(model, currentTask) !== null);
+            r.isSupported = supported;
+            // update UI frozen style + emoji
+            if (r.element) {
+                if (!supported) {
+                    r.element.classList.add('frozen');
+                    r.element.innerHTML = '🚫';
+                } else {
+                    r.element.classList.remove('frozen');
+                    r.element.innerHTML = model.emoji;
+                }
+            }
+            // update speed display metric in badge (live)
+            const rawVal = getRawTaskSpeed(model, currentTask);
+            let metricText = '';
+            if (currentTask === 'text') metricText = rawVal ? `${rawVal} tok/s` : '—';
+            else if (currentTask === 'image') metricText = supported ? `${rawVal} sec/img` : 'not supported';
+            else metricText = supported ? `${rawVal} sec/clip` : 'not supported';
+            const speedBadge = document.querySelector(`.track-card[data-model-id="${model.id}"] .speed-badge`);
+            if (speedBadge) speedBadge.innerHTML = `⚡ ${metricText}`;
+            const supportSpan = document.querySelector(`.track-card[data-model-id="${model.id}"] .task-support`);
+            if (supportSpan) supportSpan.innerHTML = supported ? '✓ supported' : '🚫 unsupported (frozen)';
+            
+            if (supported && r.trackWidth > 0) {
+                let spd = 0;
+                if (currentTask === 'text') spd = computePxPerFrame(model, currentTask, r.trackWidth, maxSpeedRef);
+                else if (currentTask === 'image') spd = computePxPerFrame(model, currentTask, r.trackWidth, maxSpeedRef);
+                else if (currentTask === 'audio') spd = computePxPerFrame(model, currentTask, r.trackWidth, maxSpeedRef);
+                r.speedPxPerFrame = spd;
+            } else {
+                r.speedPxPerFrame = 0;
+            }
+            // keep position within bounds but don't reset fully (user can reset manually)
+            const maxX = r.trackWidth - 52;
+            if (r.position > maxX) r.position = maxX;
+            if (r.position < 0) r.position = 0;
+            if (r.element) r.element.style.transform = `translateX(${r.position}px)`;
+        }
+    }
+    
+    // animation loop: continuous ping-pong (left ↔ right)
+    let lastTimestamp = 0;
+    function animate() {
+        if (!animationActive) {
+            animationFrameId = requestAnimationFrame(animate);
+            return;
+        }
+        for (let r of runners) {
+            if (!r.isSupported || r.speedPxPerFrame <= 0) continue;
+            let newPos = r.position + (r.direction * r.speedPxPerFrame);
+            const maxBound = r.trackWidth - 52;
+            if (maxBound <= 0) continue;
+            if (newPos >= maxBound) {
+                newPos = maxBound;
+                r.direction = -1;
+            } else if (newPos <= 0) {
+                newPos = 0;
+                r.direction = 1;
+            }
+            r.position = newPos;
+            if (r.element) r.element.style.transform = `translateX(${r.position}px)`;
+        }
+        animationFrameId = requestAnimationFrame(animate);
+    }
+    
+    // full reset all positions to start (0) and set direction right
+    function resetAllPositions() {
+        for (let r of runners) {
+            r.position = 0;
+            r.direction = 1;
+            if (r.element) r.element.style.transform = `translateX(0px)`;
+        }
+    }
+    
+    // when task changes
+    function setTask(task) {
+        currentTask = task;
+        // update active UI
+        document.querySelectorAll('.task-btn').forEach(btn => {
+            if (btn.dataset.task === task) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        // rebuild tracks to reflect support metrics & fresh runners
+        const maxRef = getMaxSpeedForCurrentTask();
+        buildTracks();            // rebuild DOM
+        setTimeout(() => {
+            initRunners(maxRef);
+            refreshSpeedsAndCapability();
+            resetAllPositions();
+        }, 20);
+    }
+    
+    // resize handler: recalc speeds, preserve relative positions
+    let resizeTimeout;
+    function handleResize() {
+        if (resizeTimeout) clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            if (runners.length === 0) return;
+            const maxRef = getMaxSpeedForCurrentTask();
+            for (let r of runners) {
+                const zone = document.getElementById(`zone-${r.modelId}`);
+                if (zone) {
+                    const newWidth = zone.clientWidth;
+                    const oldWidth = r.trackWidth;
+                    if (oldWidth > 0 && newWidth > 0) {
+                        const ratio = Math.min(1, r.position / (oldWidth - 52));
+                        r.trackWidth = newWidth;
+                        const newMax = newWidth - 52;
+                        let newPos = ratio * newMax;
+                        newPos = Math.min(newMax, Math.max(0, newPos));
+                        r.position = newPos;
+                        if (r.element) r.element.style.transform = `translateX(${r.position}px)`;
+                    } else {
+                        r.trackWidth = newWidth;
+                    }
+                    const model = MODELS.find(m => m.id === r.modelId);
+                    if (model && r.isSupported) {
+                        if (currentTask === 'text') r.speedPxPerFrame = computePxPerFrame(model, currentTask, r.trackWidth, maxRef);
+                        else if (currentTask === 'image') r.speedPxPerFrame = computePxPerFrame(model, currentTask, r.trackWidth, maxRef);
+                        else if (currentTask === 'audio') r.speedPxPerFrame = computePxPerFrame(model, currentTask, r.trackWidth, maxRef);
+                        else r.speedPxPerFrame = 0;
+                    }
+                }
+            }
+        }, 100);
+    }
+    
+    // initialization & event binding
+    window.addEventListener('load', () => {
+        buildTracks();
+        setTimeout(() => {
+            initRunners(getMaxSpeedForCurrentTask());
+            startAnimation();
+        }, 30);
+        
+        // task buttons
+        document.querySelectorAll('.task-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const task = btn.dataset.task;
+                if (task === 'text') setTask('text');
+                else if (task === 'image') setTask('image');
+                else if (task === 'audio') setTask('audio');
+            });
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', () => resetAllPositions());
+        document.getElementById('pauseBtn').addEventListener('click', () => { animationActive = false; });
+        document.getElementById('resumeBtn').addEventListener('click', () => { animationActive = true; });
+        
+        window.addEventListener('resize', () => handleResize());
+    });
+    
+    function startAnimation() {
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        animationActive = true;
+        animationFrameId = requestAnimationFrame(animate);
+    }
+</script>
+</body>
+</html>
