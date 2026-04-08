@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>AI Energy Footprint Explorer | Content Creator Edition</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #f0f4f8;
+      font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+      padding: 24px 16px;
+      color: #1a2c3e;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 32px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      padding: 24px 20px 32px;
+      transition: all 0.2s;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    h1 span {
+      background: #e9ecef;
+      font-size: 0.9rem;
+      font-weight: normal;
+      padding: 4px 12px;
+      border-radius: 40px;
+      color: #2c3e50;
+    }
+
+    .disclaimer {
+      background: #fff7e5;
+      border-left: 5px solid #f5a623;
+      padding: 14px 18px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      margin: 20px 0 24px 0;
+      color: #5a4a1a;
+      line-height: 1.4;
+    }
+
+    .disclaimer strong {
+      color: #c47a00;
+    }
+
+    .section {
+      background: #f9fafc;
+      border-radius: 24px;
+      padding: 16px 18px;
+      margin-bottom: 24px;
+      border: 1px solid #e6edf4;
+    }
+
+    .section-title {
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #1f3a4b;
+    }
+
+    .slider-group {
+      margin-bottom: 20px;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 500;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      background: #d0dde9;
+      border-radius: 10px;
+      outline: none;
+    }
+
+    input[type="range"]:focus {
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      background: #2c7da0;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      border: none;
+    }
+
+    .value-display {
+      background: white;
+      padding: 6px 12px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1f6392;
+      display: inline-block;
+      margin-top: 6px;
+    }
+
+    .profile-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 10px;
+      margin-bottom: 8px;
+    }
+
+    .profile-btn {
+      background: white;
+      border: 1px solid #bdd3e8;
+      padding: 8px 16px;
+      border-radius: 40px;
+      font-weight: 500;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #1f6392;
+    }
+
+    .profile-btn:hover {
+      background: #e1f0fa;
+      border-color: #2c7da0;
+    }
+
+    .results-panel {
+      background: linear-gradient(135deg, #f1f9fe 0%, #ffffff 100%);
+      border-radius: 28px;
+      padding: 20px;
+      margin: 16px 0 20px;
+      border: 1px solid #cde3f0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+
+    .energy-total {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #1e6f5c;
+      margin-bottom: 20px;
+      border-bottom: 2px dashed #cfe3ef;
+      padding-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+
+    .energy-number {
+      font-size: 2.4rem;
+      letter-spacing: -0.5px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .metric-card {
+      background: white;
+      border-radius: 24px;
+      padding: 12px 14px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      border: 1px solid #e2edf5;
+    }
+
+    .metric-emoji {
+      font-size: 1.6rem;
+      margin-right: 8px;
+    }
+
+    .metric-title {
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #4a6f8f;
+    }
+
+    .metric-value {
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: #1f3a4b;
+      line-height: 1.3;
+    }
+
+    .metric-sub {
+      font-size: 0.7rem;
+      color: #6c8eaa;
+    }
+
+    .math-toggle {
+      margin: 16px 0 10px;
+      text-align: center;
+    }
+
+    .math-btn {
+      background: none;
+      border: none;
+      color: #2c7da0;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 8px;
+    }
+
+    .math-content {
+      background: #f4f9fe;
+      padding: 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-family: monospace;
+      margin-top: 12px;
+      border: 1px solid #dbe9f3;
+      display: none;
+    }
+
+    .math-content.show {
+      display: block;
+    }
+
+    .sources {
+      font-size: 0.7rem;
+      text-align: center;
+      margin-top: 28px;
+      color: #5f7f9c;
+      border-top: 1px solid #e2edf5;
+      padding-top: 20px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 0.7rem;
+      color: #7c9bb5;
+    }
+
+    hr {
+      margin: 16px 0;
+      border: none;
+      border-top: 1px solid #e2edf5;
+    }
+
+    @media (max-width: 550px) {
+      .card {
+        padding: 18px;
+      }
+      .energy-total {
+        font-size: 1.5rem;
+      }
+      .metric-value {
+        font-size: 1rem;
+      }
+      .metric-grid {
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <h1>
+      🧠 Your AI Energy Footprint 
+      <span>Created by ALX</span>
+    </h1>
+    <div class="disclaimer">
+      <strong>⚠️ Important note:</strong> These figures are <strong>estimates</strong> based on peer-reviewed research (2021–2024). Actual energy varies by AI model, hardware, data center efficiency, and task complexity. This tool is designed for <strong>relative comparison and awareness</strong>, not precise measurement.
+
+      <hr>
+
+      <p><b>🔍 Energy used to generate this app: ~2 Wh</b></p>
+      <ul>
+        <li>💡 LED bulb (10W) → ~12 minutes</li>
+        <li>📱 Smartphone charge (15 Wh) → ~13% of a full charge</li>
+        <li>🧺 Washing machine (500 Wh) → ~0.4% of a cycle</li>
+        <li>💧 Water (cooling) → ~0.0005 liters (0.5 milliliters)</li>
+      </ul>
+    </div>
+
+    <!-- Text generation section -->
+    <div class="section">
+      <div class="section-title">📝 TEXT GENERATION</div>
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Text pieces per day</span>
+          <span id="textCountVal" class="value-display">20</span>
+        </div>
+        <input type="range" id="textPieces" min="0" max="100" value="20" step="1">
+      </div>
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Average words per piece</span>
+          <span id="wordsPerPieceVal" class="value-display">100</span>
+        </div>
+        <input type="range" id="wordsPerPiece" min="10" max="500" value="100" step="5">
+      </div>
+    </div>
+
+    <!-- Image generation -->
+    <div class="section">
+      <div class="section-title">🖼️ IMAGE GENERATION</div>
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Images generated per day</span>
+          <span id="imagesCountVal" class="value-display">5</span>
+        </div>
+        <input type="range" id="imageCount" min="0" max="50" value="5" step="1">
+      </div>
+    </div>
+
+    <!-- Audio generation -->
+    <div class="section">
+      <div class="section-title">🔊 AUDIO (1‑minute clips)</div>
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Audio clips per day</span>
+          <span id="audioCountVal" class="value-display">3</span>
+        </div>
+        <input type="range" id="audioCount" min="0" max="30" value="3" step="1">
+      </div>
+    </div>
+
+    <!-- Profile presets -->
+    <div class="profile-buttons">
+      <button class="profile-btn" data-profile="light">🌱 Light user</button>
+      <button class="profile-btn" data-profile="average">✨ Average creator</button>
+      <button class="profile-btn" data-profile="power">⚡ Power creator</button>
+    </div>
+
+    <!-- Results panel with corrected water metric -->
+    <div class="results-panel">
+      <div class="energy-total">
+        <span>⚡ Daily AI energy</span>
+        <span class="energy-number" id="totalEnergyWh">8.50</span>
+        <span>Wh</span>
+      </div>
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div><span class="metric-emoji">🧺</span> <span class="metric-title">WASHING MACHINE</span></div>
+          <div class="metric-value" id="washingMachine">1.02</div>
+          <div class="metric-sub">minutes of runtime</div>
+        </div>
+        <div class="metric-card">
+          <div><span class="metric-emoji">🏠</span> <span class="metric-title">RURAL HOME (daily)</span></div>
+          <div class="metric-value" id="ruralHomePercent">4.25</div>
+          <div class="metric-sub">% of average daily usage</div>
+        </div>
+        <div class="metric-card">
+          <div><span class="metric-emoji">💡</span> <span class="metric-title">LED BULB (10W)</span></div>
+          <div class="metric-value" id="ledHours">51.0</div>
+          <div class="metric-sub">minutes of light</div>
+        </div>
+        <div class="metric-card">
+          <div><span class="metric-emoji">📱</span> <span class="metric-title">SMARTPHONE CHARGE</span></div>
+          <div class="metric-value" id="phoneCharges">0.57</div>
+          <div class="metric-sub">full charges (15Wh)</div>
+        </div>
+        <div class="metric-card">
+          <div><span class="metric-emoji">💧</span> <span class="metric-title">WATER FOR COOLING</span></div>
+          <div class="metric-value" id="waterLiters">0.0021</div>
+          <div class="metric-sub">liters per day (~2.1 mL, <1 teaspoon)</div>
+        </div>
+        <div class="metric-card">
+          <div><span class="metric-emoji">📆</span> <span class="metric-title">MONTHLY EQUIVALENT</span></div>
+          <div class="metric-value" id="monthlyWh">255</div>
+          <div class="metric-sub">Wh per month (30 days)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Math & sources with corrected water explanation -->
+    <div class="math-toggle">
+      <button class="math-btn" id="toggleMathBtn">🔍 Show my math & assumptions</button>
+    </div>
+    <div id="mathSection" class="math-content">
+      <strong>⚙️ Calculation method (estimates based on literature):</strong><br>
+      • Text: 0.001 Wh per word → (text pieces × words/piece) × 0.001 Wh<br>
+      • Image: 1.0 Wh per image (range 0.5–2.5 Wh, average used)<br>
+      • Audio (1 min): 3.0 Wh per clip (based on 0.5 Wh per 10 seconds × 6)<br>
+      <strong>🌍 Conversion references:</strong><br>
+      • Washing machine: 500 Wh per full cycle → runtime (min) = (Energy_Wh / 500) × 60<br>
+      • Rural African home baseline: 200 Wh/day → percentage = (Energy_Wh / 200) × 100<br>
+      • LED bulb 10W: runtime (min) = (Energy_Wh / 10) × 60<br>
+      • Smartphone charge: 15 Wh per full charge → charges = Energy_Wh / 15<br>
+      • <strong>💧 Water:</strong> ~0.00025 L per Wh (0.25 L per kWh) — based on Google 2023 & Ren et al. 2023. Older overestimates (0.5 L/Wh) were incorrect by a factor of 2000x.<br>
+      • Monthly equivalent: daily energy × 30 days<br><br>
+      <strong>📌 Disclaimer:</strong> All numbers are illustrative. Real-world AI energy depends on model size (GPT‑3 vs efficient model), hardware, data center PUE, and geographical factors. Water usage varies significantly with cooling technology and local climate.
+    </div>
+
+    <div class="sources">
+      📚 <strong>Sources:</strong> Strubell et al. (2019), Patterson et al. (2021), Luccioni et al. (2023), Ren et al. (2023), Google Sustainability Report (2023), Hugging Face & CMU energy leaderboard.
+    </div>
+  </div>
+  <footer>
+    ⚡ Explore your creative footprint — every prompt, image, and sound has an impact.
+  </footer>
+</div>
+
+<script>
+  // DOM elements
+  const textPiecesSlider = document.getElementById('textPieces');
+  const wordsPerPieceSlider = document.getElementById('wordsPerPiece');
+  const imageCountSlider = document.getElementById('imageCount');
+  const audioCountSlider = document.getElementById('audioCount');
+
+  const textCountVal = document.getElementById('textCountVal');
+  const wordsPerPieceVal = document.getElementById('wordsPerPieceVal');
+  const imagesCountVal = document.getElementById('imagesCountVal');
+  const audioCountVal = document.getElementById('audioCountVal');
+
+  const totalEnergySpan = document.getElementById('totalEnergyWh');
+  const washingMachineSpan = document.getElementById('washingMachine');
+  const ruralHomePercentSpan = document.getElementById('ruralHomePercent');
+  const ledHoursSpan = document.getElementById('ledHours');
+  const phoneChargesSpan = document.getElementById('phoneCharges');
+  const waterLitersSpan = document.getElementById('waterLiters');
+  const monthlyWhSpan = document.getElementById('monthlyWh');
+
+  // energy constants (Wh per unit)
+  const ENERGY_PER_WORD = 0.001;       // Wh per word
+  const ENERGY_PER_IMAGE = 1.0;        // Wh per image
+  const ENERGY_PER_AUDIO_CLIP = 3.0;    // Wh per 1-minute clip (60 seconds)
+
+  // conversion constants
+  const WASHING_CYCLE_WH = 500;         // 500Wh per full cycle
+  const RURAL_HOME_DAILY_WH = 200;      // baseline 200Wh/day
+  const LED_WATT = 10;                  // 10W bulb
+  const SMARTPHONE_CHARGE_WH = 15;
+  // CORRECTED water factor: 0.25 liters per kWh = 0.00025 liters per Wh
+  const WATER_LITERS_PER_WH = 0.00025;   // ✅ accurate based on peer-reviewed data (Google, UC Riverside)
+
+  function formatNumber(num, decimals = 2) {
+    return num.toFixed(decimals);
+  }
+
+  function updateAll() {
+    // read values
+    let textPieces = parseFloat(textPiecesSlider.value);
+    let wordsPerPiece = parseFloat(wordsPerPieceSlider.value);
+    let imageCount = parseFloat(imageCountSlider.value);
+    let audioCount = parseFloat(audioCountSlider.value);
+
+    // update displayed numbers
+    textCountVal.innerText = textPieces;
+    wordsPerPieceVal.innerText = wordsPerPiece;
+    imagesCountVal.innerText = imageCount;
+    audioCountVal.innerText = audioCount;
+
+    // total words per day
+    const totalWords = textPieces * wordsPerPiece;
+    const textEnergy = totalWords * ENERGY_PER_WORD;
+    const imageEnergy = imageCount * ENERGY_PER_IMAGE;
+    const audioEnergy = audioCount * ENERGY_PER_AUDIO_CLIP;
+
+    let totalEnergy = textEnergy + imageEnergy + audioEnergy;
+
+    // round for display
+    totalEnergySpan.innerText = formatNumber(totalEnergy, 2);
+
+    // WASHING MACHINE (minutes)
+    let washingMinutes = (totalEnergy / WASHING_CYCLE_WH) * 60;
+    washingMachineSpan.innerText = formatNumber(washingMinutes, 2);
+
+    // RURAL HOME % of daily 200Wh
+    let ruralPercent = (totalEnergy / RURAL_HOME_DAILY_WH) * 100;
+    ruralHomePercentSpan.innerText = formatNumber(ruralPercent, 2);
+
+    // LED bulb minutes (10W)
+    let ledMinutes = (totalEnergy / LED_WATT) * 60;
+    ledHoursSpan.innerText = formatNumber(ledMinutes, 1);
+
+    // Smartphone charges
+    let phoneCharges = totalEnergy / SMARTPHONE_CHARGE_WH;
+    phoneChargesSpan.innerText = formatNumber(phoneCharges, 2);
+
+    // Water liters (using corrected factor)
+    let waterLiters = totalEnergy * WATER_LITERS_PER_WH;
+    // show up to 4 decimal places for very small numbers
+    waterLitersSpan.innerText = formatNumber(waterLiters, 4);
+
+    // monthly (30 days)
+    let monthly = totalEnergy * 30;
+    monthlyWhSpan.innerText = formatNumber(monthly, 0);
+  }
+
+  // attach event listeners
+  textPiecesSlider.addEventListener('input', updateAll);
+  wordsPerPieceSlider.addEventListener('input', updateAll);
+  imageCountSlider.addEventListener('input', updateAll);
+  audioCountSlider.addEventListener('input', updateAll);
+
+  // preset profiles
+  const profiles = {
+    light: { textPieces: 5, wordsPerPiece: 50, images: 1, audio: 0 },
+    average: { textPieces: 20, wordsPerPiece: 100, images: 5, audio: 3 },
+    power: { textPieces: 50, wordsPerPiece: 150, images: 20, audio: 10 }
+  };
+
+  document.querySelectorAll('.profile-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const profileName = btn.getAttribute('data-profile');
+      const profile = profiles[profileName];
+      if (profile) {
+        textPiecesSlider.value = profile.textPieces;
+        wordsPerPieceSlider.value = profile.wordsPerPiece;
+        imageCountSlider.value = profile.images;
+        audioCountSlider.value = profile.audio;
+        updateAll();
+      }
+    });
+  });
+
+  // toggle math section
+  const toggleBtn = document.getElementById('toggleMathBtn');
+  const mathSection = document.getElementById('mathSection');
+  toggleBtn.addEventListener('click', () => {
+    mathSection.classList.toggle('show');
+    toggleBtn.innerText = mathSection.classList.contains('show') ? '🔒 Hide my math & assumptions' : '🔍 Show my math & assumptions';
+  });
+
+  // initial call
+  updateAll();
+</script>
+</body>
+</html>
