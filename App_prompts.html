@@ -312,35 +312,41 @@
   }
 
   async function copyHandler(e) {
-    e.stopPropagation();
-    const btn = e.currentTarget;
-    const promptId = btn.getAttribute('data-prompt-id');
-    const promptElement = document.getElementById(promptId);
-    
-    if (promptElement) {
-      const textToCopy = promptElement.innerText;
-      try {
-        await navigator.clipboard.writeText(textToCopy);
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '✓ Copied!';
-        setTimeout(() => {
-          btn.innerHTML = originalText;
-        }, 1800);
-      } catch (err) {
-        console.error('Copy failed:', err);
-        btn.innerHTML = '⚠️ Error';
-        setTimeout(() => {
-          btn.innerHTML = '📋 Copy Prompt';
-        }, 1200);
-      }
+  e.stopPropagation();
+  const btn = e.currentTarget;
+  const promptId = btn.getAttribute('data-prompt-id');
+  const promptElement = document.getElementById(promptId);
+
+  if (!promptElement) return;
+
+  const textToCopy = promptElement.innerText;
+
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(textToCopy);
     } else {
-      console.error('Prompt element not found:', promptId);
-      btn.innerHTML = '❌ Not found';
-      setTimeout(() => {
-        btn.innerHTML = '📋 Copy Prompt';
-      }, 1200);
+      // Fallback for non-secure contexts (like GitHub preview)
+      const textarea = document.createElement("textarea");
+      textarea.value = textToCopy;
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
     }
+
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '✓ Copied!';
+    setTimeout(() => btn.innerHTML = originalText, 1800);
+
+  } catch (err) {
+    console.error('Copy failed:', err);
+    btn.innerHTML = '⚠️ Error';
+    setTimeout(() => btn.innerHTML = '📋 Copy Prompt', 1200);
   }
+}
 
   function animatePanelChange(newHtmlContent) {
     if (!panelEl) return;
