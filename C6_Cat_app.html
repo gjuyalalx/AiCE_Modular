@@ -131,28 +131,6 @@
       color: #1a5d7a;
     }
 
-    .copy-prompt-btn {
-      background: #e9ecf3;
-      border: 1px solid #cbdbe0;
-      padding: 6px 14px;
-      border-radius: 40px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 12px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: 0.2s;
-      color: #1f4e6e;
-    }
-
-    .copy-prompt-btn:hover {
-      background: #d4deec;
-      border-color: #8ba3c2;
-      transform: scale(0.98);
-    }
-
     mark {
       background: #ffe6b3;
       padding: 0 4px;
@@ -294,52 +272,12 @@
           <div class="callout-content">
             <h>Prompt:</h><br>
             <p id="prompt-${section.id}-text">${section.promptText}</p>
-            <button class="copy-prompt-btn" data-prompt-id="prompt-${section.id}-text">📋 Copy Prompt</button>
           </div>
         </div>
         <hr />
         <p style="font-size:0.75rem; color:#5f7f9c; margin-top:1rem;">Tip: copy the prompt, replace placeholders, and ask ChatGPT for follow-up questions.<br>Designed at ALX</p>
       </div>
     `;
-  }
-
-  function attachCopyEvents() {
-    const copyBtns = document.querySelectorAll('.copy-prompt-btn');
-    copyBtns.forEach(btn => {
-      btn.removeEventListener('click', copyHandler);
-      btn.addEventListener('click', copyHandler);
-    });
-  }
-
-  async function copyHandler(e) {
-    e.stopPropagation();
-    const btn = e.currentTarget;
-    const promptId = btn.getAttribute('data-prompt-id');
-    const promptElement = document.getElementById(promptId);
-    
-    if (promptElement) {
-      const textToCopy = promptElement.innerText;
-      try {
-        await navigator.clipboard.writeText(textToCopy);
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '✓ Copied!';
-        setTimeout(() => {
-          btn.innerHTML = originalText;
-        }, 1800);
-      } catch (err) {
-        console.error('Copy failed:', err);
-        btn.innerHTML = '⚠️ Error';
-        setTimeout(() => {
-          btn.innerHTML = '📋 Copy Prompt';
-        }, 1200);
-      }
-    } else {
-      console.error('Prompt element not found:', promptId);
-      btn.innerHTML = '❌ Not found';
-      setTimeout(() => {
-        btn.innerHTML = '📋 Copy Prompt';
-      }, 1200);
-    }
   }
 
   function animatePanelChange(newHtmlContent) {
@@ -351,7 +289,6 @@
       panelEl.offsetHeight;
       panelEl.style.opacity = '1';
       panelEl.style.transform = 'translateY(0px)';
-      attachCopyEvents();
     }, 180);
   }
 
